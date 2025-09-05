@@ -1,23 +1,20 @@
 import { useState } from "react";
-
 import "./App.css";
 
 function App() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  console.log(loading);
-
+  
   const [queary, setQueary] = useState("");
   const [books, setBooks] = useState([]);
   const [favorites, setFavorites] = useState([]);
-  console.log(favorites);
 
   const sendForm = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const data = await fetch(
-        `https://openlibrary.org/search.json?q=${queary}&limit=10`
+        `https://openlibrary.org/search.json?q=${queary}&limit=12`
       ).then((res) => res.json());
       setBooks(data.docs);
       setQueary("");
@@ -44,8 +41,8 @@ function App() {
     setFavorites(listStatusChanged);
   };
 
-  if (error) return <p>Hay un error: {error}</p>;
-  if (loading) return <p>Cargando.....</p>;
+  if (error) return <p className="error">There is an error: {error}</p>;
+  if (loading) return <p className="loading">Loading...</p>;
 
   return (
     <>
@@ -60,47 +57,48 @@ function App() {
           <button type="submit">Search</button>
         </form>
 
-        <h1>Books</h1>
+        <h1>Results {books.length > 0 && <span>({books.length})</span>}</h1>
         {books.length === 0 ? (
-          <p>No books found. Please search for a book or try a different search.</p>
+          <p className="no-results">No books found. Please search for a book or try a different search.</p>
         ) : (
-          <>
-            {books.length > 0 &&
-              books.map((book) => (
-                <div key={book.key}>
-                  <p>{book.title}</p>
-                  <p>{book.author_name}</p>
-                  <p>{book.first_publish_year}</p>
-                  <button onClick={() => handleFavorites(book)}>
-                    Add to the List
-                  </button>
-                </div>
-              ))}
-          </>
+          <div className="books-grid">
+            {books.map((book) => (
+              <div key={book.key} className="book-card">
+                <h3>{book.title}</h3>
+                <p className="author">{book.author_name}</p>
+                <p className="year">{book.first_publish_year}</p>
+                <button className="btn" onClick={() => handleFavorites(book)}>
+                  Add to List
+                </button>
+              </div>
+            ))}
+          </div>
         )}
-        <h1>Favorite Books</h1>
+
+        <h1>Liked Songs {favorites.length > 0 && <span>({favorites.length})</span>}</h1>
         {favorites.length === 0 ? (
-          <p>No favorite books added yet.</p>
+          <p className="no-results">No favorite books added yet.</p>
         ) : (
-          <>
-            {favorites.length > 0 &&
-              favorites.map((fav, index) => (
-                <div key={fav.key}>
-                  <p>{fav.title}</p>
-                  <p>{fav.author_name}</p>
-                  <p>{fav.first_publish_year}</p>
-                  <select
-                    value={fav.status}
-                    onChange={(e) => handleStatusChange(fav, e.target.value)}
-                  >
-                    <option value="unread">Unread</option>
-                    <option value="reading">Reading</option>
-                    <option value="read">Read</option>
-                  </select>
-                  <button onClick={() => handleDelete(index)}>Delete</button>
-                </div>
-              ))}
-          </>
+          <div className="books-grid">
+            {favorites.map((fav, index) => (
+              <div key={fav.key} className="book-card">
+                <h3>{fav.title}</h3>
+                <p className="author">{fav.author_name}</p>
+                <p className="year">{fav.first_publish_year}</p>
+                <select
+                  value={fav.status}
+                  onChange={(e) => handleStatusChange(fav, e.target.value)}
+                >
+                  <option value="unread">Unread</option>
+                  <option value="reading">Reading</option>
+                  <option value="read">Read</option>
+                </select>
+                <button className="btn btn-delete" onClick={() => handleDelete(index)}>
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
         )}
       </section>
     </>
